@@ -4,6 +4,7 @@ import { logger } from './middleware/logger';
 import { errorHandler } from './middleware/errorHandler';
 import { testConnection, checkDatabaseHealth } from './config/database';
 import { env } from './config/env';
+import { scheduler } from './services/scheduler.service';
 
 // Import routes
 import authRoutes from './routes/auth.routes';
@@ -12,6 +13,7 @@ import leaderboardRoutes from './routes/leaderboard.routes';
 import packageRoutes from './routes/package.routes';
 import paymentRoutes from './routes/payment.routes';
 import transactionRoutes from './routes/transaction.routes';
+import websocketRoutes, { websocketHandlers } from './routes/websocket.routes';
 
 const app = new Hono();
 
@@ -38,6 +40,7 @@ app.route('/api/v1/leaderboard', leaderboardRoutes);
 app.route('/api/v1/packages', packageRoutes);
 app.route('/api/v1/payment', paymentRoutes);
 app.route('/api/v1/transactions', transactionRoutes);
+app.route('/ws', websocketRoutes);
 
 // 404 handler
 app.notFound((c) => {
@@ -55,6 +58,9 @@ async function startServer() {
     // Test database connection
     await testConnection();
 
+    // Start scheduler service for leaderboard resets
+    scheduler.start();
+
     console.log(`
 ╔═══════════════════════════════════════════════════════════╗
 ║                                                           ║
@@ -65,14 +71,30 @@ async function startServer() {
 ║  Version:     0.1.0${' '.repeat(36)}║
 ║                                                           ║
 ║  Server is running at http://localhost:${port}${' '.repeat(14)}║
+║  WebSocket:   ws://localhost:${port}/ws${' '.repeat(17)}║
+║  Scheduler:   Active${' '.repeat(35)}║
 ║                                                           ║
 ╚═══════════════════════════════════════════════════════════╝
     `);
 
-    // Start the server
+    // Start the server with WebSocket support
     Bun.serve({
       port,
       fetch: app.fetch,
+      websocket: websocketHandlers,
+    });
+
+    // Handle graceful shutdown
+    process.on('SIGTERM', () => {
+      console.log('SIGTERM signal received: closing server');
+      scheduler.stop();
+      process.exit(0);
+    });
+
+    process.on('SIGINT', () => {
+      console.log('SIGINT signal received: closing server');
+      scheduler.stop();
+      process.exit(0);
     });
   } catch (error) {
     console.error('Failed to start server:', error);

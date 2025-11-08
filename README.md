@@ -17,6 +17,7 @@ This is a monorepo containing:
 - Riverpod (State Management)
 - Go Router (Navigation)
 - Dio (HTTP Client)
+- WebSocket (Real-time Updates)
 
 ### Backend
 - Bun runtime
@@ -24,6 +25,8 @@ This is a monorepo containing:
 - PostgreSQL (Database)
 - JWT Authentication
 - Zod (Validation)
+- WebSocket (Real-time Communication)
+- Scheduled Jobs (Leaderboard Auto-reset)
 
 ### Infrastructure
 - Docker & Docker Compose
@@ -139,6 +142,11 @@ bun run db:seed
 - `GET /api/v1/leaderboard/monthly` - Get monthly leaderboard
 - `GET /api/v1/leaderboard/weekly` - Get weekly leaderboard
 - `GET /api/v1/leaderboard/regional?region=US` - Get regional leaderboard
+- `GET /api/v1/leaderboard/history?type=global` - Get user's rank history
+- `GET /api/v1/leaderboard/me` - Get current user's rank in all leaderboards
+
+#### WebSocket Endpoint
+- `WS /ws/leaderboard` - Real-time leaderboard updates and rank change notifications
 
 ## Stage 1: Foundation & Infrastructure ✅
 
@@ -150,13 +158,36 @@ bun run db:seed
 - [x] Implement basic authentication system (JWT tokens)
 - [x] Set up environment configuration (dev, staging, production)
 
-## Next Steps (Stage 2)
+## Stage 2: Core Leaderboard & Purchase System ✅
 
-- [ ] Create user registration and onboarding flow
-- [ ] Implement global leaderboard display
-- [ ] Build Flex Points system
-- [ ] Integrate Stripe payment processing
-- [ ] Create purchase packages UI
+- [x] Create user registration and onboarding flow
+- [x] Implement global leaderboard display
+- [x] Build Flex Points system
+- [x] Integrate Stripe payment processing
+- [x] Create purchase packages UI
+- [x] Implement transaction recording and validation
+- [x] Build user profile page
+
+## Stage 3: Advanced Leaderboards & Real-time Updates ✅
+
+- [x] Implement monthly leaderboard with auto-reset functionality
+- [x] Implement weekly leaderboard with auto-reset functionality
+- [x] Create regional leaderboards with geographic filtering
+- [x] Set up WebSocket infrastructure for real-time updates
+- [x] Implement real-time rank change notifications
+- [x] Create leaderboard position history tracking
+- [x] Add scheduled job system for automatic leaderboard resets
+- [x] Build mobile WebSocket client with reconnection logic
+- [x] Implement animated rank change notifications in mobile app
+- [x] Create rank history visualization charts
+
+## Next Steps (Stage 4)
+
+- [ ] Design and implement achievement system database schema
+- [ ] Create achievement badges
+- [ ] Implement achievement unlock logic and notifications
+- [ ] Build exclusive titles system based on spending tiers
+- [ ] Create profile customization features
 
 ## Documentation
 

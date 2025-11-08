@@ -4,6 +4,8 @@ import { stripe, getPublishableKey, getWebhookSecret } from '../config/stripe';
 import { getUser } from '../middleware/auth';
 import { AppError } from '../middleware/errorHandler';
 import { sql } from '../config/database';
+import { recordUserRankHistory } from '../services/leaderboard.service';
+import { wsService } from '../services/websocket.service';
 
 const createCheckoutSchema = z.object({
   packageId: z.string().uuid(),
@@ -206,6 +208,9 @@ export async function verifyPayment(c: Context) {
         WHERE id = ${transactionId}
       `;
 
+      // Trigger rank update notifications
+      await handleRankUpdate(userId);
+
       return c.json({
         data: {
           status: 'completed',
@@ -261,6 +266,12 @@ export async function handleWebhook(c: Context) {
           SET status = 'completed', updated_at = NOW()
           WHERE id = ${transactionId}
         `;
+
+        // Get user ID and trigger rank update
+        const userId = session.metadata?.userId;
+        if (userId) {
+          await handleRankUpdate(userId);
+        }
       }
       break;
     }
@@ -275,6 +286,12 @@ export async function handleWebhook(c: Context) {
           SET status = 'completed', updated_at = NOW()
           WHERE id = ${transactionId}
         `;
+
+        // Get user ID and trigger rank update
+        const userId = paymentIntent.metadata?.userId;
+        if (userId) {
+          await handleRankUpdate(userId);
+        }
       }
       break;
     }
@@ -298,4 +315,74 @@ export async function handleWebhook(c: Context) {
   }
 
   return c.json({ received: true });
+}
+
+/**
+ * Handle rank update notifications after a completed transaction
+ */
+async function handleRankUpdate(userId: string) {
+  try {
+    // Get user's current region
+    const [user] = await sql`SELECT region FROM users WHERE id = ${userId}`;
+    const region = user?.region;
+
+    // Record rank history and get rank changes for all leaderboard types
+    const [globalUpdate, monthlyUpdate, weeklyUpdate, regionalUpdate] = await Promise.all([
+      recordUserRankHistory(userId, 'global'),
+      recordUserRankHistory(userId, 'monthly'),
+      recordUserRankHistory(userId, 'weekly'),
+      region ? recordUserRankHistory(userId, 'regional', region) : null,
+    ]);
+
+    // Broadcast rank change notifications for each leaderboard
+    if (globalUpdate) {
+      wsService.broadcastRankChange({
+        userId,
+        leaderboardType: 'global',
+        oldRank: globalUpdate.previousRank,
+        newRank: globalUpdate.currentRank,
+        rankChange: globalUpdate.rankChange || 0,
+        totalFlexPoints: 0, // Will be populated from leaderboard
+      });
+    }
+
+    if (monthlyUpdate) {
+      wsService.broadcastRankChange({
+        userId,
+        leaderboardType: 'monthly',
+        oldRank: monthlyUpdate.previousRank,
+        newRank: monthlyUpdate.currentRank,
+        rankChange: monthlyUpdate.rankChange || 0,
+        totalFlexPoints: 0,
+      });
+    }
+
+    if (weeklyUpdate) {
+      wsService.broadcastRankChange({
+        userId,
+        leaderboardType: 'weekly',
+        oldRank: weeklyUpdate.previousRank,
+        newRank: weeklyUpdate.currentRank,
+        rankChange: weeklyUpdate.rankChange || 0,
+        totalFlexPoints: 0,
+      });
+    }
+
+    if (regionalUpdate && region) {
+      wsService.broadcastRankChange({
+        userId,
+        leaderboardType: 'regional',
+        region,
+        oldRank: regionalUpdate.previousRank,
+        newRank: regionalUpdate.currentRank,
+        rankChange: regionalUpdate.rankChange || 0,
+        totalFlexPoints: 0,
+      });
+    }
+
+    console.log(`✅ Rank update notifications sent for user ${userId}`);
+  } catch (error) {
+    console.error('Failed to handle rank update:', error);
+    // Don't throw - this is a background operation
+  }
 }
