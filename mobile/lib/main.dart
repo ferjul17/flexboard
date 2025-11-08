@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'core/theme/app_theme.dart';
+import 'core/constants/app_constants.dart';
 
 void main() {
-  runApp(const FlexboardApp());
+  runApp(
+    const ProviderScope(
+      child: FlexboardApp(),
+    ),
+  );
 }
 
 class FlexboardApp extends StatelessWidget {
@@ -10,11 +17,9 @@ class FlexboardApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flexboard',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-        useMaterial3: true,
-      ),
+      title: AppConstants.appName,
+      theme: AppTheme.darkTheme,
+      debugShowCheckedModeBanner: false,
       home: const HomePage(),
     );
   }
@@ -27,11 +32,25 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text('Flexboard'),
       ),
-      body: const Center(
-        child: Text('Welcome to Flexboard'),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'Welcome to Flexboard',
+              style: Theme.of(context).textTheme.headlineMedium,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Stage 1: Foundation & Infrastructure',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: AppTheme.primaryGold,
+                  ),
+            ),
+          ],
+        ),
       ),
     );
   }
