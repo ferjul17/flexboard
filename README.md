@@ -1,77 +1,168 @@
 # Flexboard
 
-Flexboard is a mobile application with a backend API, organized as a monorepo.
+A wealth display platform designed as a mobile application where financial capability becomes the primary metric of engagement.
 
-## Repository Structure
+## Project Structure
 
-This monorepo contains two main projects:
+This is a monorepo containing:
 
-```
-flexboard/
-├── backend/          # Bun backend service
-├── mobile/           # Flutter mobile application
-└── README.md         # This file
-```
+- **mobile/** - Flutter mobile application (iOS & Android)
+- **backend/** - Bun runtime API server
+- **docker-compose.yml** - Local development environment setup
 
-## Projects
+## Tech Stack
+
+### Frontend (Mobile)
+- Flutter (iOS & Android)
+- Riverpod (State Management)
+- Go Router (Navigation)
+- Dio (HTTP Client)
 
 ### Backend
+- Bun runtime
+- Hono (Web Framework)
+- PostgreSQL (Database)
+- JWT Authentication
+- Zod (Validation)
 
-The backend is built with [Bun](https://bun.sh/), a fast JavaScript runtime.
-
-- **Location**: `backend/`
-- **Language**: TypeScript
-- **Runtime**: Bun
-
-See [backend/README.md](backend/README.md) for more details.
-
-### Mobile
-
-The mobile application is built with [Flutter](https://flutter.dev/), supporting both iOS and Android.
-
-- **Location**: `mobile/`
-- **Language**: Dart
-- **Framework**: Flutter
-
-See [mobile/README.md](mobile/README.md) for more details.
+### Infrastructure
+- Docker & Docker Compose
+- PostgreSQL 16
 
 ## Getting Started
 
 ### Prerequisites
 
-- [Bun](https://bun.sh/) >= 1.0.0 (for backend)
-- [Flutter](https://flutter.dev/) >= 3.0.0 (for mobile)
-- [Dart](https://dart.dev/) >= 3.0.0 (for mobile)
+- [Bun](https://bun.sh/) installed
+- [Flutter](https://flutter.dev/) SDK installed
+- [Docker](https://www.docker.com/) and Docker Compose installed
 
-### Setup
+### Backend Setup
 
-1. Clone the repository:
-
-```bash
-git clone <repository-url>
-cd flexboard
-```
-
-2. Set up the backend:
-
+1. Navigate to the backend directory:
 ```bash
 cd backend
-bun install
-bun run dev
 ```
 
-3. Set up the mobile app:
+2. Install dependencies:
+```bash
+bun install
+```
 
+3. Create a `.env` file based on `.env.example`:
+```bash
+cp .env.example .env
+```
+
+4. Start the development environment with Docker Compose:
+```bash
+cd ..
+docker-compose up -d
+```
+
+5. Run database migrations:
+```bash
+cd backend
+bun run db:migrate
+```
+
+6. (Optional) Seed the database with demo data:
+```bash
+bun run db:seed
+```
+
+The backend API will be available at `http://localhost:3000`
+
+### Mobile Setup
+
+1. Navigate to the mobile directory:
 ```bash
 cd mobile
+```
+
+2. Install dependencies:
+```bash
 flutter pub get
+```
+
+3. Run the app:
+```bash
+# For iOS
+flutter run
+
+# For Android
 flutter run
 ```
 
 ## Development
 
-Each project can be developed independently. Refer to the README files in each directory for specific development instructions.
+### Backend Development
+
+Start the backend in development mode (with hot reload):
+```bash
+cd backend
+bun run dev
+```
+
+### Database Management
+
+- **pgAdmin** is available at `http://localhost:5050`
+  - Email: `admin@flexboard.com`
+  - Password: `admin`
+
+- **Run migrations:**
+```bash
+cd backend
+bun run db:migrate
+```
+
+- **Seed database:**
+```bash
+cd backend
+bun run db:seed
+```
+
+### API Documentation
+
+#### Authentication Endpoints
+- `POST /api/v1/auth/register` - Register new user
+- `POST /api/v1/auth/login` - Login user
+- `POST /api/v1/auth/refresh` - Refresh access token
+- `POST /api/v1/auth/logout` - Logout user
+
+#### User Endpoints
+- `GET /api/v1/user/profile` - Get user profile
+- `PUT /api/v1/user/profile` - Update user profile
+
+#### Leaderboard Endpoints
+- `GET /api/v1/leaderboard/global` - Get global leaderboard
+- `GET /api/v1/leaderboard/monthly` - Get monthly leaderboard
+- `GET /api/v1/leaderboard/weekly` - Get weekly leaderboard
+- `GET /api/v1/leaderboard/regional?region=US` - Get regional leaderboard
+
+## Stage 1: Foundation & Infrastructure ✅
+
+- [x] Initialize Flutter project with proper folder structure
+- [x] Set up backend API infrastructure with Bun runtime
+- [x] Create Dockerfile for backend API
+- [x] Create docker-compose.yml for local development
+- [x] Design and implement PostgreSQL database schema
+- [x] Implement basic authentication system (JWT tokens)
+- [x] Set up environment configuration (dev, staging, production)
+
+## Next Steps (Stage 2)
+
+- [ ] Create user registration and onboarding flow
+- [ ] Implement global leaderboard display
+- [ ] Build Flex Points system
+- [ ] Integrate Stripe payment processing
+- [ ] Create purchase packages UI
+
+## Documentation
+
+- [Product Specification](./PRODUCT_SPEC.md)
+- [Development Roadmap](./ROADMAP.md)
 
 ## License
 
-[Add your license here]
+Proprietary - All rights reserved

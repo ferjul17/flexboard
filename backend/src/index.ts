@@ -1,3 +1,76 @@
-console.log("Flexboard Backend - Ready for development");
+import { Hono } from 'hono';
+import { cors } from './middleware/cors';
+import { logger } from './middleware/logger';
+import { errorHandler } from './middleware/errorHandler';
+import { testConnection } from './config/database';
+import { env } from './config/env';
 
-export {};
+// Import routes
+import authRoutes from './routes/auth.routes';
+import userRoutes from './routes/user.routes';
+import leaderboardRoutes from './routes/leaderboard.routes';
+
+const app = new Hono();
+
+// Apply middleware
+app.use('*', cors());
+app.use('*', logger);
+
+// Health check endpoint
+app.get('/health', (c) => {
+  return c.json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    environment: env.NODE_ENV,
+  });
+});
+
+// API routes
+app.route('/api/v1/auth', authRoutes);
+app.route('/api/v1/user', userRoutes);
+app.route('/api/v1/leaderboard', leaderboardRoutes);
+
+// 404 handler
+app.notFound((c) => {
+  return c.json({ error: 'Not Found' }, 404);
+});
+
+// Error handler
+app.onError(errorHandler);
+
+// Start server
+const port = parseInt(env.PORT);
+
+async function startServer() {
+  try {
+    // Test database connection
+    await testConnection();
+
+    console.log(`
+╔═══════════════════════════════════════════════════════════╗
+║                                                           ║
+║              🎯 FLEXBOARD BACKEND API 🎯                  ║
+║                                                           ║
+║  Environment: ${env.NODE_ENV.padEnd(43)}║
+║  Port:        ${port.toString().padEnd(43)}║
+║  Version:     0.1.0${' '.repeat(36)}║
+║                                                           ║
+║  Server is running at http://localhost:${port}${' '.repeat(14)}║
+║                                                           ║
+╚═══════════════════════════════════════════════════════════╝
+    `);
+
+    // Start the server
+    Bun.serve({
+      port,
+      fetch: app.fetch,
+    });
+  } catch (error) {
+    console.error('Failed to start server:', error);
+    process.exit(1);
+  }
+}
+
+startServer();
+
+export default app;
