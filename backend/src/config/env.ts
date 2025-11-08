@@ -9,6 +9,9 @@ const envSchema = z.object({
   JWT_EXPIRES_IN: z.string().default('1h'),
   JWT_REFRESH_EXPIRES_IN: z.string().default('7d'),
   CORS_ORIGIN: z.string().default('*'),
+  STRIPE_SECRET_KEY: z.string(),
+  STRIPE_PUBLISHABLE_KEY: z.string(),
+  STRIPE_WEBHOOK_SECRET: z.string().optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;
@@ -23,6 +26,9 @@ function loadEnv(): Env {
     JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN,
     JWT_REFRESH_EXPIRES_IN: process.env.JWT_REFRESH_EXPIRES_IN,
     CORS_ORIGIN: process.env.CORS_ORIGIN,
+    STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
+    STRIPE_PUBLISHABLE_KEY: process.env.STRIPE_PUBLISHABLE_KEY,
+    STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
   };
 
   const result = envSchema.safeParse(env);

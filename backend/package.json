@@ -14,7 +14,8 @@
     "postgres": "^3.4.3",
     "jose": "^5.2.0",
     "zod": "^3.22.4",
-    "bcrypt": "^5.1.1"
+    "bcrypt": "^5.1.1",
+    "stripe": "^14.10.0"
   },
   "devDependencies": {
     "@types/bun": "latest",

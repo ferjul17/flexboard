@@ -9,6 +9,9 @@ import { env } from './config/env';
 import authRoutes from './routes/auth.routes';
 import userRoutes from './routes/user.routes';
 import leaderboardRoutes from './routes/leaderboard.routes';
+import packageRoutes from './routes/package.routes';
+import paymentRoutes from './routes/payment.routes';
+import transactionRoutes from './routes/transaction.routes';
 
 const app = new Hono();
 
@@ -29,6 +32,9 @@ app.get('/health', (c) => {
 app.route('/api/v1/auth', authRoutes);
 app.route('/api/v1/user', userRoutes);
 app.route('/api/v1/leaderboard', leaderboardRoutes);
+app.route('/api/v1/packages', packageRoutes);
+app.route('/api/v1/payment', paymentRoutes);
+app.route('/api/v1/transactions', transactionRoutes);
 
 // 404 handler
 app.notFound((c) => {
