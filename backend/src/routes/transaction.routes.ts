@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import { authenticateUser } from '../middleware/auth';
+import { authMiddleware } from '../middleware/auth';
 import {
   getTransactions,
   getTransaction,
@@ -9,7 +9,7 @@ import {
 const transactionRoutes = new Hono();
 
 // All routes are protected
-transactionRoutes.use('/*', authenticateUser);
+transactionRoutes.use('/*', authMiddleware);
 
 // Get transaction history
 transactionRoutes.get('/', getTransactions);

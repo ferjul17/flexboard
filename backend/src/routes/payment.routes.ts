@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import { authenticateUser } from '../middleware/auth';
+import { authMiddleware } from '../middleware/auth';
 import {
   getStripeConfig,
   createCheckout,
@@ -15,7 +15,7 @@ paymentRoutes.get('/config', getStripeConfig);
 paymentRoutes.post('/webhook', handleWebhook);
 
 // Protected routes
-paymentRoutes.use('/*', authenticateUser);
+paymentRoutes.use('/*', authMiddleware);
 paymentRoutes.post('/checkout', createCheckout);
 paymentRoutes.post('/payment-intent', createPaymentIntent);
 paymentRoutes.get('/verify/:transactionId', verifyPayment);

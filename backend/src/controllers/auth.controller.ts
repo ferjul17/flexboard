@@ -2,18 +2,19 @@ import { Context } from 'hono';
 import { z } from 'zod';
 import { hashPassword, verifyPassword } from '../utils/password';
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../utils/jwt';
+import { sanitizeUsername, sanitizeEmail } from '../utils/sanitize';
 import { AppError } from '../middleware/errorHandler';
 import { sql } from '../config/database';
 
 // Validation schemas
 const registerSchema = z.object({
-  email: z.string().email(),
-  username: z.string().min(3).max(50),
+  email: z.string().email().transform(sanitizeEmail),
+  username: z.string().min(3).max(50).transform(sanitizeUsername),
   password: z.string().min(8),
 });
 
 const loginSchema = z.object({
-  email: z.string().email(),
+  email: z.string().email().transform(sanitizeEmail),
   password: z.string(),
 });
 
