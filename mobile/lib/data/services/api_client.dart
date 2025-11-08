@@ -1,8 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import '../../core/constants/app_constants.dart';
 
 class ApiClient {
-  static const String baseUrl = 'http://localhost:3000/api/v1';
+  static String get baseUrl => '${AppConstants.baseUrl}/api/${AppConstants.apiVersion}';
   static const String storageKeyAccessToken = 'access_token';
   static const String storageKeyRefreshToken = 'refresh_token';
 
@@ -14,8 +15,8 @@ class ApiClient {
         _storage = storage ?? const FlutterSecureStorage() {
     _dio.options = BaseOptions(
       baseUrl: baseUrl,
-      connectTimeout: const Duration(seconds: 30),
-      receiveTimeout: const Duration(seconds: 30),
+      connectTimeout: AppConstants.apiTimeout,
+      receiveTimeout: AppConstants.apiTimeout,
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',

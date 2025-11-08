@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { cors } from './middleware/cors';
 import { logger } from './middleware/logger';
 import { errorHandler } from './middleware/errorHandler';
-import { testConnection } from './config/database';
+import { testConnection, checkDatabaseHealth } from './config/database';
 import { env } from './config/env';
 
 // Import routes
@@ -20,12 +20,15 @@ app.use('*', cors());
 app.use('*', logger);
 
 // Health check endpoint
-app.get('/health', (c) => {
+app.get('/health', async (c) => {
+  const dbHealthy = await checkDatabaseHealth();
+
   return c.json({
-    status: 'ok',
+    status: dbHealthy ? 'ok' : 'degraded',
     timestamp: new Date().toISOString(),
     environment: env.NODE_ENV,
-  });
+    database: dbHealthy ? 'connected' : 'disconnected',
+  }, dbHealthy ? 200 : 503);
 });
 
 // API routes

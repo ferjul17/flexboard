@@ -1,11 +1,12 @@
 import { Context } from 'hono';
 import { z } from 'zod';
 import { getUser } from '../middleware/auth';
+import { sanitizeUsername } from '../utils/sanitize';
 import { AppError } from '../middleware/errorHandler';
 import { sql } from '../config/database';
 
 const updateProfileSchema = z.object({
-  username: z.string().min(3).max(50).optional(),
+  username: z.string().min(3).max(50).transform(sanitizeUsername).optional(),
 });
 
 export async function getProfile(c: Context) {

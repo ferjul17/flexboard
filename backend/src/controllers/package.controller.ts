@@ -1,5 +1,6 @@
 import { Context } from 'hono';
 import { sql } from '../config/database';
+import { AppError } from '../middleware/errorHandler';
 
 /**
  * Get all available packages
@@ -55,7 +56,7 @@ export async function getPackageById(c: Context) {
   `;
 
   if (!pkg) {
-    return c.json({ error: 'Package not found' }, 404);
+    throw new AppError(404, 'Package not found', 'PACKAGE_NOT_FOUND');
   }
 
   return c.json({

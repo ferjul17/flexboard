@@ -1,5 +1,6 @@
 import { Context } from 'hono';
 import { sql } from '../config/database';
+import { AppError } from '../middleware/errorHandler';
 
 const DEFAULT_PAGE_SIZE = 50;
 
@@ -173,7 +174,7 @@ export async function getRegionalLeaderboard(c: Context) {
   const offset = (page - 1) * pageSize;
 
   if (!region) {
-    return c.json({ error: 'Region parameter is required' }, 400);
+    throw new AppError(400, 'Region parameter is required', 'REGION_REQUIRED');
   }
 
   // Note: This assumes users table has a 'region' column
