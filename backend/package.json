@@ -9,8 +9,8 @@
     "db:migrate": "bun run src/db/migrate.ts",
     "db:seed": "bun run src/db/seed.ts",
     "test": "bun test",
-    "lint": "eslint src --ext .ts",
-    "lint:fix": "eslint src --ext .ts --fix",
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix",
     "fmt": "prettier --check \"src/**/*.ts\"",
     "fmt:fix": "prettier --write \"src/**/*.ts\"",
     "build": "tsc --noEmit",
@@ -27,10 +27,11 @@
   "devDependencies": {
     "@types/bun": "latest",
     "@types/bcrypt": "^5.0.2",
-    "@typescript-eslint/eslint-plugin": "^6.21.0",
-    "@typescript-eslint/parser": "^6.21.0",
-    "eslint": "^8.56.0",
-    "prettier": "^3.2.4"
+    "@typescript-eslint/eslint-plugin": "^8.18.1",
+    "@typescript-eslint/parser": "^8.18.1",
+    "eslint": "^9.15.0",
+    "prettier": "^3.4.2",
+    "typescript-eslint": "^8.18.1"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
