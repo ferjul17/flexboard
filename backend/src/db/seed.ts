@@ -68,7 +68,9 @@ async function seedDatabase() {
                 )
               `;
             }
-            console.log(`  ✅ Created ${txn.count} ${txn.packageName} transactions for ${createdUsers[txn.user].username}`);
+            console.log(
+              `  ✅ Created ${txn.count} ${txn.packageName} transactions for ${createdUsers[txn.user].username}`
+            );
           }
         }
       }
@@ -86,4 +88,4 @@ async function seedDatabase() {
   }
 }
 
-seedDatabase();
+void seedDatabase();

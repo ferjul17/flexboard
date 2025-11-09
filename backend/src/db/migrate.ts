@@ -18,9 +18,7 @@ async function runMigrations() {
     // Get all migration files
     const migrationsDir = join(import.meta.dir, 'migrations');
     const files = await readdir(migrationsDir);
-    const migrationFiles = files
-      .filter((file) => file.endsWith('.sql'))
-      .sort();
+    const migrationFiles = files.filter((file) => file.endsWith('.sql')).sort();
 
     // Get already executed migrations
     const executedMigrations = await sql`
@@ -67,4 +65,4 @@ async function runMigrations() {
   }
 }
 
-runMigrations();
+void runMigrations();

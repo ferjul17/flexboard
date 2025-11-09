@@ -125,13 +125,17 @@ class WebSocketService {
       }
     });
 
-    console.log(`📢 Rank change broadcast: ${notification.userId} (${notification.leaderboardType}), sent to ${sentCount} clients`);
+    console.log(
+      `📢 Rank change broadcast: ${notification.userId} (${notification.leaderboardType}), sent to ${sentCount} clients`
+    );
   }
 
   /**
    * Broadcast a general leaderboard update
    */
-  broadcastLeaderboardUpdate(notification: Omit<LeaderboardUpdateNotification, 'type' | 'timestamp'>) {
+  broadcastLeaderboardUpdate(
+    notification: Omit<LeaderboardUpdateNotification, 'type' | 'timestamp'>
+  ) {
     const message: LeaderboardUpdateNotification = {
       type: 'leaderboard_update',
       ...notification,

@@ -1,4 +1,4 @@
-import { Context } from 'hono';
+import type { Context } from 'hono';
 import { sql } from '../config/database';
 import { AppError } from '../middleware/errorHandler';
 import { getUser } from '../middleware/auth';
@@ -246,7 +246,11 @@ export async function getUserHistory(c: Context) {
   }
 
   if (leaderboardType === 'regional' && !region) {
-    throw new AppError(400, 'Region parameter is required for regional leaderboard', 'REGION_REQUIRED');
+    throw new AppError(
+      400,
+      'Region parameter is required for regional leaderboard',
+      'REGION_REQUIRED'
+    );
   }
 
   const history = await getUserLeaderboardHistory(

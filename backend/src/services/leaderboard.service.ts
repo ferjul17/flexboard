@@ -5,7 +5,7 @@ import { sql } from '../config/database';
  * history tracking, snapshots, and resets
  */
 
-interface LeaderboardEntry {
+export interface LeaderboardEntry {
   userId: string;
   username: string;
   rank: number;
@@ -35,7 +35,7 @@ export async function recordUserRankHistory(
     FROM leaderboard_history
     WHERE user_id = ${userId}
       AND leaderboard_type = ${leaderboardType}
-      AND (${region}::text IS NULL OR region = ${region})
+      AND (${region ?? null}::text IS NULL OR region = ${region ?? null})
     ORDER BY recorded_at DESC
     LIMIT 1
   `;
@@ -261,7 +261,9 @@ export async function resetMonthlyLeaderboard(region?: string) {
     )
   `;
 
-  console.log(`✅ Monthly leaderboard reset complete. Top user: ${topUser?.username || 'N/A'} with ${topUser?.totalFlexPoints || 0} points`);
+  console.log(
+    `✅ Monthly leaderboard reset complete. Top user: ${topUser?.username || 'N/A'} with ${topUser?.totalFlexPoints || 0} points`
+  );
 
   return {
     topUser,
@@ -315,7 +317,9 @@ export async function resetWeeklyLeaderboard(region?: string) {
     )
   `;
 
-  console.log(`✅ Weekly leaderboard reset complete. Top user: ${topUser?.username || 'N/A'} with ${topUser?.totalFlexPoints || 0} points`);
+  console.log(
+    `✅ Weekly leaderboard reset complete. Top user: ${topUser?.username || 'N/A'} with ${topUser?.totalFlexPoints || 0} points`
+  );
 
   return {
     topUser,
@@ -344,7 +348,7 @@ export async function getUserLeaderboardHistory(
     FROM leaderboard_history
     WHERE user_id = ${userId}
       AND leaderboard_type = ${leaderboardType}
-      AND (${region}::text IS NULL OR region = ${region})
+      AND (${region ?? null}::text IS NULL OR region = ${region ?? null})
     ORDER BY recorded_at DESC
     LIMIT ${limit}
   `;

@@ -3,7 +3,11 @@
  * Handles automatic leaderboard resets and snapshots
  */
 
-import { resetMonthlyLeaderboard, resetWeeklyLeaderboard, createLeaderboardSnapshot } from './leaderboard.service';
+import {
+  resetMonthlyLeaderboard,
+  resetWeeklyLeaderboard,
+  createLeaderboardSnapshot,
+} from './leaderboard.service';
 
 class SchedulerService {
   private intervals: Map<string, Timer> = new Map();
@@ -64,7 +68,7 @@ class SchedulerService {
     this.intervals.set('monthly-reset', interval);
 
     // Run immediately if it's the 1st and we just started
-    checkAndReset();
+    void checkAndReset();
   }
 
   /**
@@ -92,7 +96,7 @@ class SchedulerService {
     this.intervals.set('weekly-reset', interval);
 
     // Run immediately if it's Monday and we just started
-    checkAndReset();
+    void checkAndReset();
   }
 
   /**
@@ -122,7 +126,7 @@ class SchedulerService {
     this.intervals.set('hourly-snapshots', interval);
 
     // Run once at startup
-    createSnapshots();
+    void createSnapshots();
   }
 
   /**

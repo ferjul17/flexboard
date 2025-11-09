@@ -20,7 +20,7 @@ app.get('/leaderboard', async (c) => {
     try {
       const payload = await verifyAccessToken(token);
       userId = payload.userId;
-    } catch (error) {
+    } catch (_error) {
       console.log('Invalid token provided for WebSocket connection');
     }
   }
@@ -65,11 +65,7 @@ export const websocketHandlers = {
       // Handle different message types
       switch (data.type) {
         case 'subscribe':
-          wsService.subscribeToLeaderboard(
-            clientId,
-            data.leaderboardType,
-            data.region
-          );
+          wsService.subscribeToLeaderboard(clientId, data.leaderboardType, data.region);
           ws.send(
             JSON.stringify({
               type: 'subscribed',
@@ -81,11 +77,7 @@ export const websocketHandlers = {
           break;
 
         case 'unsubscribe':
-          wsService.unsubscribeFromLeaderboard(
-            clientId,
-            data.leaderboardType,
-            data.region
-          );
+          wsService.unsubscribeFromLeaderboard(clientId, data.leaderboardType, data.region);
           ws.send(
             JSON.stringify({
               type: 'unsubscribed',

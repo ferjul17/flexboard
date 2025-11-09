@@ -1,4 +1,4 @@
-import { Context } from 'hono';
+import type { Context } from 'hono';
 import { z } from 'zod';
 import { hashPassword, verifyPassword } from '../utils/password';
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../utils/jwt';
@@ -62,20 +62,23 @@ export async function register(c: Context) {
     VALUES (${user.id}, ${refreshToken})
   `;
 
-  return c.json({
-    data: {
-      user: {
-        id: user.id,
-        email: user.email,
-        username: user.username,
-        createdAt: user.created_at,
-      },
-      tokens: {
-        accessToken,
-        refreshToken,
+  return c.json(
+    {
+      data: {
+        user: {
+          id: user.id,
+          email: user.email,
+          username: user.username,
+          createdAt: user.created_at,
+        },
+        tokens: {
+          accessToken,
+          refreshToken,
+        },
       },
     },
-  }, 201);
+    201
+  );
 }
 
 export async function login(c: Context) {
@@ -139,7 +142,7 @@ export async function refreshToken(c: Context) {
 
   try {
     // Verify refresh token
-    const payload = await verifyRefreshToken(refreshToken);
+    const _payload = await verifyRefreshToken(refreshToken);
 
     // Check if refresh token exists in database
     const [tokenRecord] = await sql`
@@ -190,7 +193,7 @@ export async function refreshToken(c: Context) {
         },
       },
     });
-  } catch (error) {
+  } catch (_error) {
     throw new AppError(401, 'Invalid refresh token', 'INVALID_REFRESH_TOKEN');
   }
 }

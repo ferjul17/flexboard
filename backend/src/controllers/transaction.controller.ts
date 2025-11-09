@@ -1,4 +1,4 @@
-import { Context } from 'hono';
+import type { Context } from 'hono';
 import { getUser } from '../middleware/auth';
 import { AppError } from '../middleware/errorHandler';
 import { sql } from '../config/database';

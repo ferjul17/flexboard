@@ -1,4 +1,4 @@
-import { Context } from 'hono';
+import type { Context } from 'hono';
 import { z } from 'zod';
 import { getUser } from '../middleware/auth';
 import { sanitizeUsername } from '../utils/sanitize';
