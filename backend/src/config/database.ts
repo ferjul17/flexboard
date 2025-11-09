@@ -25,7 +25,7 @@ export async function testConnection(retries = 3, delay = 2000) {
 
       if (attempt < retries) {
         console.log(`⏳ Retrying in ${delay}ms...`);
-        await new Promise(resolve => setTimeout(resolve, delay));
+        await new Promise((resolve) => setTimeout(resolve, delay));
       }
     }
   }

@@ -5,7 +5,7 @@ import { env } from './env';
  * Initialize Stripe client with the secret key
  */
 export const stripe = new Stripe(env.STRIPE_SECRET_KEY, {
-  apiVersion: '2024-11-20.acacia',
+  apiVersion: '2024-11-20.acacia' as Stripe.LatestApiVersion,
   typescript: true,
 });
 

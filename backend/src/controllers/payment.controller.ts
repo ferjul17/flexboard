@@ -1,5 +1,6 @@
-import { Context } from 'hono';
+import type { Context } from 'hono';
 import { z } from 'zod';
+import type Stripe from 'stripe';
 import { stripe, getPublishableKey, getWebhookSecret } from '../config/stripe';
 import { getUser } from '../middleware/auth';
 import { AppError } from '../middleware/errorHandler';
@@ -14,7 +15,7 @@ const createCheckoutSchema = z.object({
 /**
  * Get Stripe publishable key for frontend
  */
-export async function getStripeConfig(c: Context) {
+export function getStripeConfig(c: Context) {
   return c.json({
     data: {
       publishableKey: getPublishableKey(),
@@ -225,7 +226,7 @@ export async function verifyPayment(c: Context) {
         },
       });
     }
-  } catch (error) {
+  } catch (_error) {
     throw new AppError(500, 'Failed to verify payment', 'PAYMENT_VERIFICATION_FAILED');
   }
 }
@@ -245,13 +246,18 @@ export async function handleWebhook(c: Context) {
     throw new AppError(500, 'Webhook secret not configured', 'WEBHOOK_NOT_CONFIGURED');
   }
 
-  let event: any;
+  let event: Stripe.Event;
 
   try {
     const rawBody = await c.req.text();
     event = stripe.webhooks.constructEvent(rawBody, signature, webhookSecret);
-  } catch (err: any) {
-    throw new AppError(400, `Webhook signature verification failed: ${err.message}`, 'INVALID_SIGNATURE');
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Unknown error';
+    throw new AppError(
+      400,
+      `Webhook signature verification failed: ${message}`,
+      'INVALID_SIGNATURE'
+    );
   }
 
   // Handle the event

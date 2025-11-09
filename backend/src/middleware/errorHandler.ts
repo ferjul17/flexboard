@@ -1,4 +1,4 @@
-import { Context } from 'hono';
+import type { Context } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 import { ZodError } from 'zod';
 
@@ -13,7 +13,7 @@ export class AppError extends Error {
   }
 }
 
-export async function errorHandler(err: Error, c: Context) {
+export function errorHandler(err: Error, c: Context) {
   console.error('Error:', err);
 
   // Handle Zod validation errors

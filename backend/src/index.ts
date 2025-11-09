@@ -25,12 +25,15 @@ app.use('*', logger);
 app.get('/health', async (c) => {
   const dbHealthy = await checkDatabaseHealth();
 
-  return c.json({
-    status: dbHealthy ? 'ok' : 'degraded',
-    timestamp: new Date().toISOString(),
-    environment: env.NODE_ENV,
-    database: dbHealthy ? 'connected' : 'disconnected',
-  }, dbHealthy ? 200 : 503);
+  return c.json(
+    {
+      status: dbHealthy ? 'ok' : 'degraded',
+      timestamp: new Date().toISOString(),
+      environment: env.NODE_ENV,
+      database: dbHealthy ? 'connected' : 'disconnected',
+    },
+    dbHealthy ? 200 : 503
+  );
 });
 
 // API routes
@@ -102,6 +105,6 @@ async function startServer() {
   }
 }
 
-startServer();
+void startServer();
 
 export default app;

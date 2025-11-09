@@ -1,4 +1,4 @@
-import { Context, Next } from 'hono';
+import type { Context, Next } from 'hono';
 
 export async function logger(c: Context, next: Next) {
   const start = Date.now();
@@ -18,7 +18,5 @@ export async function logger(c: Context, next: Next) {
     statusColor = '\x1b[31m'; // Red
   }
 
-  console.log(
-    `${method} ${path} ${statusColor}${status}\x1b[0m - ${duration}ms`
-  );
+  console.log(`${method} ${path} ${statusColor}${status}\x1b[0m - ${duration}ms`);
 }

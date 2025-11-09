@@ -1,4 +1,4 @@
-import { Context, Next } from 'hono';
+import type { Context, Next } from 'hono';
 import { jwtVerify } from 'jose';
 import { env } from '../config/env';
 import { AppError } from './errorHandler';
@@ -30,7 +30,7 @@ export async function authMiddleware(c: Context, next: Next) {
     });
 
     await next();
-  } catch (error) {
+  } catch (_error) {
     throw new AppError(401, 'Invalid or expired token', 'INVALID_TOKEN');
   }
 }
