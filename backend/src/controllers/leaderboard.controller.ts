@@ -1,6 +1,8 @@
 import { Context } from 'hono';
 import { sql } from '../config/database';
 import { AppError } from '../middleware/errorHandler';
+import { getUser } from '../middleware/auth';
+import { getUserLeaderboardHistory } from '../services/leaderboard.service';
 
 const DEFAULT_PAGE_SIZE = 50;
 
@@ -228,4 +230,127 @@ export async function getRegionalLeaderboard(c: Context) {
       totalPages: Math.ceil(parseInt(count || 0) / pageSize),
     },
   });
+}
+
+/**
+ * Get user's rank history for a specific leaderboard
+ */
+export async function getUserHistory(c: Context) {
+  const { userId } = getUser(c);
+  const leaderboardType = c.req.query('type') || 'global';
+  const region = c.req.query('region');
+  const limit = parseInt(c.req.query('limit') || '30');
+
+  if (!['global', 'monthly', 'weekly', 'regional'].includes(leaderboardType)) {
+    throw new AppError(400, 'Invalid leaderboard type', 'INVALID_LEADERBOARD_TYPE');
+  }
+
+  if (leaderboardType === 'regional' && !region) {
+    throw new AppError(400, 'Region parameter is required for regional leaderboard', 'REGION_REQUIRED');
+  }
+
+  const history = await getUserLeaderboardHistory(
+    userId,
+    leaderboardType as 'global' | 'monthly' | 'weekly' | 'regional',
+    region,
+    limit
+  );
+
+  return c.json({
+    data: {
+      leaderboardType,
+      region,
+      history,
+    },
+  });
+}
+
+/**
+ * Get current user's rank in all leaderboards
+ */
+export async function getCurrentUserRank(c: Context) {
+  const { userId } = getUser(c);
+
+  // Get user's region
+  const [user] = await sql`SELECT region, username FROM users WHERE id = ${userId}`;
+
+  if (!user) {
+    throw new AppError(404, 'User not found', 'USER_NOT_FOUND');
+  }
+
+  // Get ranks for all leaderboard types
+  const [globalRank, monthlyRank, weeklyRank, regionalRank] = await Promise.all([
+    getUserRankInLeaderboard(userId, 'global'),
+    getUserRankInLeaderboard(userId, 'monthly'),
+    getUserRankInLeaderboard(userId, 'weekly'),
+    user.region ? getUserRankInLeaderboard(userId, 'regional', user.region) : null,
+  ]);
+
+  return c.json({
+    data: {
+      username: user.username,
+      global: globalRank,
+      monthly: monthlyRank,
+      weekly: weeklyRank,
+      regional: regionalRank,
+    },
+  });
+}
+
+/**
+ * Helper function to get user's rank in a specific leaderboard
+ */
+async function getUserRankInLeaderboard(
+  userId: string,
+  leaderboardType: 'global' | 'monthly' | 'weekly' | 'regional',
+  region?: string
+) {
+  let whereClause = `WHERE t.status = 'completed'`;
+
+  if (leaderboardType === 'monthly') {
+    whereClause += ` AND DATE_TRUNC('month', t.created_at) = DATE_TRUNC('month', CURRENT_DATE)`;
+  } else if (leaderboardType === 'weekly') {
+    whereClause += ` AND DATE_TRUNC('week', t.created_at) = DATE_TRUNC('week', CURRENT_DATE)`;
+  }
+
+  if (region && leaderboardType === 'regional') {
+    whereClause += ` AND u.region = '${region}'`;
+  }
+
+  const result = await sql.unsafe(`
+    WITH user_totals AS (
+      SELECT
+        t.user_id,
+        SUM(t.flex_points) as total_flex_points,
+        SUM(t.amount) as total_spent
+      FROM transactions t
+      JOIN users u ON t.user_id = u.id
+      ${whereClause}
+      GROUP BY t.user_id
+    ),
+    ranked_users AS (
+      SELECT
+        ut.user_id,
+        ut.total_flex_points,
+        ut.total_spent,
+        ROW_NUMBER() OVER (ORDER BY ut.total_flex_points DESC) as rank
+      FROM user_totals ut
+    )
+    SELECT
+      rank,
+      total_flex_points,
+      total_spent
+    FROM ranked_users
+    WHERE user_id = '${userId}'
+  `);
+
+  if (result.length === 0) {
+    return null;
+  }
+
+  return {
+    rank: parseInt(result[0].rank),
+    totalFlexPoints: parseInt(result[0].total_flex_points),
+    totalSpent: parseFloat(result[0].total_spent),
+  };
 }

@@ -11,5 +11,7 @@ leaderboardRoutes.get('/global', leaderboardController.getGlobalLeaderboard);
 leaderboardRoutes.get('/monthly', leaderboardController.getMonthlyLeaderboard);
 leaderboardRoutes.get('/weekly', leaderboardController.getWeeklyLeaderboard);
 leaderboardRoutes.get('/regional', leaderboardController.getRegionalLeaderboard);
+leaderboardRoutes.get('/history', leaderboardController.getUserHistory);
+leaderboardRoutes.get('/me', leaderboardController.getCurrentUserRank);
 
 export default leaderboardRoutes;
