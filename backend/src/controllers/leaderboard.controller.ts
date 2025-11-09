@@ -3,6 +3,7 @@ import { sql } from '../config/database';
 import { AppError } from '../middleware/errorHandler';
 import { getUser } from '../middleware/auth';
 import { getUserLeaderboardHistory } from '../services/leaderboard.service';
+import type { LeaderboardRow } from '../types/database';
 
 const DEFAULT_PAGE_SIZE = 50;
 
@@ -43,7 +44,7 @@ export async function getGlobalLeaderboard(c: Context) {
   `;
 
   return c.json({
-    data: leaderboard.map((entry: any) => ({
+    data: (leaderboard as unknown as LeaderboardRow[]).map((entry) => ({
       rank: parseInt(entry.rank),
       userId: entry.user_id,
       username: entry.username,
@@ -98,7 +99,7 @@ export async function getMonthlyLeaderboard(c: Context) {
   `;
 
   return c.json({
-    data: leaderboard.map((entry: any) => ({
+    data: (leaderboard as unknown as LeaderboardRow[]).map((entry) => ({
       rank: parseInt(entry.rank),
       userId: entry.user_id,
       username: entry.username,
@@ -153,7 +154,7 @@ export async function getWeeklyLeaderboard(c: Context) {
   `;
 
   return c.json({
-    data: leaderboard.map((entry: any) => ({
+    data: (leaderboard as unknown as LeaderboardRow[]).map((entry) => ({
       rank: parseInt(entry.rank),
       userId: entry.user_id,
       username: entry.username,
@@ -216,7 +217,7 @@ export async function getRegionalLeaderboard(c: Context) {
   `;
 
   return c.json({
-    data: leaderboard.map((entry: any) => ({
+    data: (leaderboard as unknown as LeaderboardRow[]).map((entry) => ({
       rank: parseInt(entry.rank),
       userId: entry.user_id,
       username: entry.username,

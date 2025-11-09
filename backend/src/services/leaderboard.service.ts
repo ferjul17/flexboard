@@ -1,4 +1,5 @@
 import { sql } from '../config/database';
+import type { LeaderboardRow, LeaderboardHistoryRow } from '../types/database';
 
 /**
  * Service for managing leaderboard operations including
@@ -195,7 +196,7 @@ export async function createLeaderboardSnapshot(
     LIMIT ${topN}
   `);
 
-  const snapshotData = leaderboard.map((entry: any) => ({
+  const snapshotData = (leaderboard as unknown as LeaderboardRow[]).map((entry) => ({
     rank: parseInt(entry.rank),
     userId: entry.user_id,
     username: entry.username,
@@ -353,7 +354,7 @@ export async function getUserLeaderboardHistory(
     LIMIT ${limit}
   `;
 
-  return history.map((entry: any) => ({
+  return (history as unknown as LeaderboardHistoryRow[]).map((entry) => ({
     rank: parseInt(entry.rank),
     totalFlexPoints: parseInt(entry.total_flex_points),
     totalSpent: parseFloat(entry.total_spent),

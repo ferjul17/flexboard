@@ -22,7 +22,7 @@ export default tseslint.config(
           caughtErrorsIgnorePattern: '^_',
         },
       ],
-      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/no-floating-promises': 'error',
       // Relax strict type checking for database queries that return any
@@ -40,6 +40,13 @@ export default tseslint.config(
       ],
       // Allow throwing non-Error objects
       '@typescript-eslint/only-throw-error': 'off',
+    },
+  },
+  // Allow 'any' usage in test files
+  {
+    files: ['**/*.test.ts', '**/*.spec.ts', '**/__tests__/**/*.ts'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
     },
   }
 );

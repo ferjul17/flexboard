@@ -24,7 +24,9 @@ async function runMigrations() {
     const executedMigrations = await sql`
       SELECT name FROM migrations
     `;
-    const executedNames = new Set(executedMigrations.map((m: any) => m.name));
+    const executedNames = new Set(
+      (executedMigrations as unknown as { name: string }[]).map((m) => m.name)
+    );
 
     // Execute pending migrations
     for (const file of migrationFiles) {

@@ -1,5 +1,6 @@
 import type { Context } from 'hono';
 import { z } from 'zod';
+import type Stripe from 'stripe';
 import { stripe, getPublishableKey, getWebhookSecret } from '../config/stripe';
 import { getUser } from '../middleware/auth';
 import { AppError } from '../middleware/errorHandler';
@@ -245,15 +246,16 @@ export async function handleWebhook(c: Context) {
     throw new AppError(500, 'Webhook secret not configured', 'WEBHOOK_NOT_CONFIGURED');
   }
 
-  let event: any;
+  let event: Stripe.Event;
 
   try {
     const rawBody = await c.req.text();
     event = stripe.webhooks.constructEvent(rawBody, signature, webhookSecret);
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Unknown error';
     throw new AppError(
       400,
-      `Webhook signature verification failed: ${err.message}`,
+      `Webhook signature verification failed: ${message}`,
       'INVALID_SIGNATURE'
     );
   }

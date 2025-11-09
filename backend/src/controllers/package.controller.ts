@@ -1,6 +1,7 @@
 import type { Context } from 'hono';
 import { sql } from '../config/database';
 import { AppError } from '../middleware/errorHandler';
+import type { PackageRow } from '../types/database';
 
 /**
  * Get all available packages
@@ -22,7 +23,7 @@ export async function getPackages(c: Context) {
   `;
 
   return c.json({
-    data: packages.map((pkg: any) => ({
+    data: (packages as unknown as PackageRow[]).map((pkg) => ({
       id: pkg.id,
       name: pkg.name,
       price: parseFloat(pkg.price),

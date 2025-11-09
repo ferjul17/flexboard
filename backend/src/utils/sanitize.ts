@@ -47,8 +47,8 @@ export function sanitizeEmail(email: string): string {
 /**
  * Remove leading/trailing whitespace from all string properties in an object
  */
-export function trimObjectStrings<T extends Record<string, any>>(obj: T): T {
-  const result: any = {};
+export function trimObjectStrings<T extends Record<string, unknown>>(obj: T): T {
+  const result: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(obj)) {
     if (typeof value === 'string') {
       result[key] = value.trim();
@@ -56,5 +56,5 @@ export function trimObjectStrings<T extends Record<string, any>>(obj: T): T {
       result[key] = value;
     }
   }
-  return result;
+  return result as T;
 }

@@ -2,6 +2,7 @@ import type { Context } from 'hono';
 import { getUser } from '../middleware/auth';
 import { AppError } from '../middleware/errorHandler';
 import { sql } from '../config/database';
+import type { TransactionRow } from '../types/database';
 
 const DEFAULT_PAGE_SIZE = 20;
 
@@ -50,7 +51,7 @@ export async function getTransactions(c: Context) {
   `;
 
   return c.json({
-    data: transactions.map((t: any) => ({
+    data: (transactions as unknown as TransactionRow[]).map((t) => ({
       id: t.id,
       packageId: t.package_id,
       packageName: t.package_name,

@@ -4,6 +4,7 @@
  */
 
 import type { ServerWebSocket } from 'bun';
+import type { WebSocketMessageData } from '../types/database';
 
 interface WebSocketClient {
   ws: ServerWebSocket<{ userId?: string }>;
@@ -11,7 +12,7 @@ interface WebSocketClient {
   subscribedLeaderboards: Set<string>;
 }
 
-interface RankChangeNotification {
+interface RankChangeNotification extends Record<string, unknown> {
   type: 'rank_change';
   userId: string;
   leaderboardType: 'global' | 'monthly' | 'weekly' | 'regional';
@@ -23,7 +24,7 @@ interface RankChangeNotification {
   timestamp: string;
 }
 
-interface LeaderboardUpdateNotification {
+interface LeaderboardUpdateNotification extends Record<string, unknown> {
   type: 'leaderboard_update';
   leaderboardType: 'global' | 'monthly' | 'weekly' | 'regional';
   region?: string;
@@ -102,13 +103,13 @@ class WebSocketService {
   broadcastRankChange(notification: Omit<RankChangeNotification, 'type' | 'timestamp'>) {
     const message: RankChangeNotification = {
       type: 'rank_change',
-      ...notification,
+      ...(notification as Record<string, unknown>),
       timestamp: new Date().toISOString(),
-    };
+    } as RankChangeNotification;
 
     const leaderboardKey = notification.region
-      ? `${notification.leaderboardType}:${notification.region}`
-      : notification.leaderboardType;
+      ? `${String(notification.leaderboardType)}:${notification.region as string}`
+      : String(notification.leaderboardType);
 
     let sentCount = 0;
 
@@ -126,7 +127,7 @@ class WebSocketService {
     });
 
     console.log(
-      `📢 Rank change broadcast: ${notification.userId} (${notification.leaderboardType}), sent to ${sentCount} clients`
+      `📢 Rank change broadcast: ${String(notification.userId)} (${String(notification.leaderboardType)}), sent to ${sentCount} clients`
     );
   }
 
@@ -138,13 +139,13 @@ class WebSocketService {
   ) {
     const message: LeaderboardUpdateNotification = {
       type: 'leaderboard_update',
-      ...notification,
+      ...(notification as Record<string, unknown>),
       timestamp: new Date().toISOString(),
-    };
+    } as LeaderboardUpdateNotification;
 
     const leaderboardKey = notification.region
-      ? `${notification.leaderboardType}:${notification.region}`
-      : notification.leaderboardType;
+      ? `${String(notification.leaderboardType)}:${notification.region as string}`
+      : String(notification.leaderboardType);
 
     let sentCount = 0;
 
@@ -155,13 +156,15 @@ class WebSocketService {
       }
     });
 
-    console.log(`📢 Leaderboard update broadcast: ${leaderboardKey}, sent to ${sentCount} clients`);
+    console.log(
+      `📢 Leaderboard update broadcast: ${String(leaderboardKey)}, sent to ${sentCount} clients`
+    );
   }
 
   /**
    * Send a message to a specific user
    */
-  sendToUser(userId: string, message: any) {
+  sendToUser(userId: string, message: WebSocketMessageData) {
     let sentCount = 0;
 
     this.clients.forEach((client) => {
@@ -177,7 +180,7 @@ class WebSocketService {
   /**
    * Send a message to all connected clients
    */
-  broadcast(message: any) {
+  broadcast(message: WebSocketMessageData) {
     this.clients.forEach((client) => {
       this.sendMessage(client.ws, message);
     });
@@ -186,7 +189,7 @@ class WebSocketService {
   /**
    * Send a message to a WebSocket client
    */
-  private sendMessage(ws: ServerWebSocket<{ userId?: string }>, message: any) {
+  private sendMessage(ws: ServerWebSocket<{ userId?: string }>, message: WebSocketMessageData) {
     try {
       ws.send(JSON.stringify(message));
     } catch (error) {
