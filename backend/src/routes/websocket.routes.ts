@@ -3,6 +3,16 @@ import { wsService } from '../services/websocket.service';
 import { verifyAccessToken } from '../utils/jwt';
 import type { ServerWebSocket } from 'bun';
 
+interface ServerEnv {
+  server?: {
+    upgrade: (req: Request, options: { data: { userId?: string } }) => boolean;
+  };
+}
+
+interface ExtendedWebSocket extends ServerWebSocket<{ userId?: string }> {
+  clientId?: string;
+}
+
 const app = new Hono();
 
 /**
@@ -20,13 +30,13 @@ app.get('/leaderboard', async (c) => {
     try {
       const payload = await verifyAccessToken(token);
       userId = payload.userId;
-    } catch (error) {
+    } catch (_error) {
       console.log('Invalid token provided for WebSocket connection');
     }
   }
 
   // Upgrade to WebSocket
-  const success = (c.env as any).server?.upgrade(c.req.raw, {
+  const success = (c.env as ServerEnv).server?.upgrade(c.req.raw, {
     data: { userId },
   });
 
@@ -44,7 +54,7 @@ app.get('/leaderboard', async (c) => {
 export const websocketHandlers = {
   open(ws: ServerWebSocket<{ userId?: string }>) {
     const clientId = wsService.registerClient(ws, ws.data.userId);
-    (ws as any).clientId = clientId;
+    (ws as ExtendedWebSocket).clientId = clientId;
 
     // Send welcome message
     ws.send(
@@ -60,16 +70,14 @@ export const websocketHandlers = {
   message(ws: ServerWebSocket<{ userId?: string }>, message: string | Buffer) {
     try {
       const data = JSON.parse(message.toString());
-      const clientId = (ws as any).clientId;
+      const clientId = (ws as ExtendedWebSocket).clientId;
 
       // Handle different message types
       switch (data.type) {
         case 'subscribe':
-          wsService.subscribeToLeaderboard(
-            clientId,
-            data.leaderboardType,
-            data.region
-          );
+          if (clientId) {
+            wsService.subscribeToLeaderboard(clientId, data.leaderboardType, data.region);
+          }
           ws.send(
             JSON.stringify({
               type: 'subscribed',
@@ -81,11 +89,9 @@ export const websocketHandlers = {
           break;
 
         case 'unsubscribe':
-          wsService.unsubscribeFromLeaderboard(
-            clientId,
-            data.leaderboardType,
-            data.region
-          );
+          if (clientId) {
+            wsService.unsubscribeFromLeaderboard(clientId, data.leaderboardType, data.region);
+          }
           ws.send(
             JSON.stringify({
               type: 'unsubscribed',
@@ -127,7 +133,7 @@ export const websocketHandlers = {
   },
 
   close(ws: ServerWebSocket<{ userId?: string }>) {
-    const clientId = (ws as any).clientId;
+    const clientId = (ws as ExtendedWebSocket).clientId;
     if (clientId) {
       wsService.unregisterClient(clientId);
     }

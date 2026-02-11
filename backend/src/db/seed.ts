@@ -53,7 +53,14 @@ async function seedDatabase() {
 
       for (const txn of transactions) {
         if (createdUsers[txn.user]) {
-          const pkg = packages.find((p: any) => p.name === txn.packageName);
+          const pkg = (
+            packages as unknown as {
+              name: string;
+              id: string;
+              price: string;
+              flex_points: string;
+            }[]
+          ).find((p) => p.name === txn.packageName);
           if (pkg) {
             for (let i = 0; i < txn.count; i++) {
               await sql`
@@ -68,7 +75,9 @@ async function seedDatabase() {
                 )
               `;
             }
-            console.log(`  ✅ Created ${txn.count} ${txn.packageName} transactions for ${createdUsers[txn.user].username}`);
+            console.log(
+              `  ✅ Created ${txn.count} ${txn.packageName} transactions for ${createdUsers[txn.user].username}`
+            );
           }
         }
       }
@@ -86,4 +95,4 @@ async function seedDatabase() {
   }
 }
 
-seedDatabase();
+void seedDatabase();
